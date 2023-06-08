@@ -110,6 +110,9 @@ type Endpoint struct {
 	// Interval is the duration to wait between every status check
 	Interval time.Duration `yaml:"interval,omitempty"`
 
+	// FailureInterval is the duration to wait between every status check when the endpoint is down
+	FailureInterval time.Duration `yaml:"failure-interval,omitempty"`
+
 	// Conditions used to determine the health of the endpoint
 	Conditions []Condition `yaml:"conditions"`
 
@@ -205,6 +208,9 @@ func (endpoint *Endpoint) ValidateAndSetDefaults() error {
 	}
 	if endpoint.Interval == 0 {
 		endpoint.Interval = 1 * time.Minute
+	}
+	if endpoint.FailureInterval == 0 {
+		endpoint.FailureInterval = endpoint.Interval
 	}
 	if len(endpoint.Method) == 0 {
 		endpoint.Method = http.MethodGet

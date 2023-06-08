@@ -42,11 +42,17 @@ func monitor(endpoint *core.Endpoint, alertingConfig *alerting.Config, maintenan
 	execute(endpoint, alertingConfig, maintenanceConfig, connectivityConfig, disableMonitoringLock, enabledMetrics, debug)
 	// Loop for the next executions
 	for {
+		var interval time.Duration
+		if endpoint.NumberOfFailuresInARow > 0 {
+			interval = endpoint.FailureInterval
+		} else {
+			interval = endpoint.Interval
+		}
 		select {
 		case <-ctx.Done():
 			log.Printf("[watchdog][monitor] Canceling current execution of group=%s; endpoint=%s", endpoint.Group, endpoint.Name)
 			return
-		case <-time.After(endpoint.Interval):
+		case <-time.After(interval):
 			execute(endpoint, alertingConfig, maintenanceConfig, connectivityConfig, disableMonitoringLock, enabledMetrics, debug)
 		}
 	}
